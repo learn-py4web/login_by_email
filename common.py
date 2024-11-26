@@ -13,6 +13,7 @@ from pydal.tools.tags import Tags
 from py4web.utils.factories import ActionFactory
 from py4web.utils.form import FormStyleBulma
 from . import settings
+from .auth_by_email import AuthByEmail
 
 # #######################################################
 # implement custom loggers form settings.LOGGERS
@@ -90,6 +91,13 @@ if settings.UPLOAD_FOLDER:
     #
     # field.upload_path = settings.UPLOAD_FOLDER
     # field.download_url = lambda filename: URL('download/%s' % filename)
+
+# #######################################################
+# Auth
+# #######################################################
+
+
+auth = AuthByEmail(session)
 
 # #######################################################
 # Optionally configure celery

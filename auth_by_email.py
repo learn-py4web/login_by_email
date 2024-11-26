@@ -80,6 +80,21 @@ class AuthByEmail(Fixture):
         
     def on_success(self, context):
         context["template_inject"] = {"user_email": self.get_user_email()}
+        
+    @property
+    def enforce(self):
+        return Enforcer(self)
+
+
+class Enforcer(Fixture):
+    
+    def __init__(self, auth):
+        self.__prerequisites__ = [auth]
+        self.auth = auth
+        
+    def on_request(self, context):
+        if not self.auth.get_user_email():
+            redirect(URL('auth/login'))
 
             
             

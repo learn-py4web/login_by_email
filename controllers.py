@@ -33,10 +33,14 @@ from .auth_by_email import AuthByEmail
 
 auth = AuthByEmail(session)
 
-url_signer = URLSigner(session)
-
 @action('index')
-@action.uses('index.html', auth, url_signer)
+@action.uses('index.html', auth)
 def index():
     return dict()
+
+@action('secure')
+@action.uses('secure.html', auth.enforce)
+def secure():
+    return dict()
+
 

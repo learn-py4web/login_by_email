@@ -40,7 +40,7 @@
               [[if globals().get('user'):]]
                 <div class="navbar-item has-dropdown is-hoverable">
                   <a class="navbar-link is-primary">
-                    [[=globals().get('user').get('email')]]
+                    [[=globals().get('user_email')]]
                   </a>
                   <div class="navbar-dropdown">
                     <a class="navbar-item" href="[[=URL('auth/logout')]]">Logout</a>

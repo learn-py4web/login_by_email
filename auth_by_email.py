@@ -59,6 +59,18 @@ class AuthByEmail(Fixture):
             # We are good. 
             session['email'] = email
             redirect(URL('index'))
+            
+        @action('auth/logout')
+        @action.uses(session)
+        def _():
+            session.clear()
+            redirect(URL('index'))
+            
+    def get_user_email(self):
+        return self.session.get('email')
+        
+    def on_success(self, context):
+        context["template_inject"] = {"user_email": self.get_user_email()}
 
             
             

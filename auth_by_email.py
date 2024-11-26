@@ -7,6 +7,7 @@ from py4web.core import Fixture
 from py4web.utils.form import Form, FormStyleBulma
 from pydal import Field
 from pydal.validators import IS_EMAIL
+from yatl.helpers import A
 
 
 class AuthByEmail(Fixture):
@@ -19,7 +20,7 @@ class AuthByEmail(Fixture):
         
         # Endpoint for login form. 
         @action('auth/login', method=['GET', 'POST'])
-        @action.uses(session, 'login.html')
+        @action.uses('auth/login.html', session)
         def _():
             login_form = Form([Field('email', requires=IS_EMAIL())], csrf_session=session, formstyle=FormStyleBulma)
             if login_form.accepted:
@@ -33,11 +34,19 @@ class AuthByEmail(Fixture):
                 h.update(login_form.vars['email'].encode('utf-8'))
                 h.update(invitation_secret.encode('utf-8'))
                 h.update(t.encode('utf-8'))
-                # Sends the login link. 
+                # Instead of emailing the link, we redirect the user to a page where they can click on it.
+                # This is done just for demo purposes obviously, as we do not have email sending capabilities.  
                 login_email = URL('auth/validate', vars=dict(email=login_form.vars['email'], time=t, signature=h.hexdigest()), scheme=True)
                 # We should email this URL, but we just go to it. 
-                redirect(login_email)
+                redirect(URL('auth/click', vars=dict(url=login_email)))
             return dict(login_form=login_form)
+        
+        # This endpoint is used just to let the user click on the link. 
+        @action('auth/click')
+        @action.uses('auth/click.html', session)
+        def _():
+            url = request.query.get('url')
+            return dict(link=A(url, _href=url))
         
         # Endpoint for access from login. 
         @action('auth/validate')

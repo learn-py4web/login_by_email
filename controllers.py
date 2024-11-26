@@ -36,7 +36,7 @@ auth = AuthByEmail(session)
 url_signer = URLSigner(session)
 
 @action('index')
-@action.uses('index.html', db, auth, url_signer)
+@action.uses('index.html', auth, url_signer)
 def index():
     return dict()
 

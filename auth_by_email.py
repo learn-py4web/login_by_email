@@ -6,7 +6,7 @@ from py4web import action, request, abort, redirect, URL
 from py4web.core import Fixture
 from py4web.utils.form import Form, FormStyleBulma
 from pydal import Field
-from pydal.validators import IS_EMAIL
+from pydal.validators import IS_EMAIL, IS_NOT_EMPTY
 from yatl.helpers import A
 
 
@@ -49,8 +49,8 @@ class AuthByEmail(Fixture):
             return dict(link=A(url, _href=url))
         
         # Endpoint for access from login. 
-        @action('auth/validate')
-        @action.uses(session)
+        @action('auth/validate', method=['GET', 'POST'])
+        @action.uses('auth/validate.html', session)
         def _():
             email = request.query.get('email')
             t = request.query.get('time')
@@ -65,9 +65,15 @@ class AuthByEmail(Fixture):
             # Checks the time. 
             if float(t) < time.time() - 60 * 5:
                 abort(403)
-            # We are good. 
-            session['email'] = email
-            redirect(URL('index'))
+            # We are good.  Let's ask for the user name. 
+            form = Form([
+                Field('email', default=email, writable=False, readable=True),
+                Field('name', requires=IS_NOT_EMPTY())], 
+                        csrf_session=session, formstyle=FormStyleBulma)
+            if form.accepted:
+                session['user'] = dict(email=email, name=form.vars['name'])
+                redirect(URL('index'))
+            return dict(form=form)
             
         @action('auth/logout')
         @action.uses(session)
@@ -75,14 +81,15 @@ class AuthByEmail(Fixture):
             session.clear()
             redirect(URL('index'))
             
-    def get_user_email(self):
-        return self.session.get('email')
-        
     def on_success(self, context):
-        context["template_inject"] = {"user_email": self.get_user_email()}
+        context["template_inject"] = {"user": self.current_user}
         
     @property
-    def enforce(self):
+    def current_user(self):
+        return self.session.get('user', {})
+        
+    @property
+    def user(self):
         return Enforcer(self)
 
 
@@ -93,8 +100,7 @@ class Enforcer(Fixture):
         self.auth = auth
         
     def on_request(self, context):
-        if not self.auth.get_user_email():
+        if not self.auth.current_user:
             redirect(URL('auth/login'))
-
-            
+                        
             

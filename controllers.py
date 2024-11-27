@@ -36,7 +36,7 @@ def index():
     return dict()
 
 @action('secure')
-@action.uses('secure.html', auth.enforce)
+@action.uses('secure.html', auth.user)
 def secure():
     return dict()
 
